@@ -11,11 +11,11 @@
 # YASM firs to run this makefile withot problems.
 #*************************************************
 #change the name "ejemplo" for the name of your source file
-name=ejemplo
+name=T2P1
 #program to use as the assembler (you could use NASM or YASM for this makefile)
 ASM=yasm
 #flags for the assember
-ASM_F=-f elf  #for x86-64 architecture use ASM_F=-f elf64 besides ASM_F=-f elf
+ASM_F=-f elf64  #for x86-64 architecture use ASM_F=-f elf64 besides ASM_F=-f elf
 
 #program to use as linker
 LINKER=ld
