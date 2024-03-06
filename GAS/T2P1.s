@@ -33,6 +33,8 @@ compareTexts:
     movb (%rsi), %al
     cmpb $0xA, %al
     je printFinalText
+    cmpb $' ', %al
+    je addSpace
     cmpb $'A', %al
     jb finishCodeError
     cmpb $'Z', %al
@@ -45,6 +47,12 @@ compareTextsLower:
     cmpb $'z', %al
     ja finishCodeError
     jmp toUpperCase
+
+addSpace:
+    movb (%rsi), %al
+    inc %rsi
+    jmp compareTexts
+		
 
 toUpperCase:
     movb (%rsi), %al

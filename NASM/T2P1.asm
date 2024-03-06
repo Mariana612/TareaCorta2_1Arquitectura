@@ -34,6 +34,8 @@ _compareTexts:
 	mov al, byte[esi]	;obtiene el caracter menos significativo
 	cmp al, 0xA		;se asegura de que sea el final
 	je _printFinalText	;fin
+	cmp al, ' '
+	je _addSpace
 	cmp al,'A'		;le resta al caracter 41 si es menos de 41 entonces no es valido
 	jb _finishCodeError	;da error
 	cmp al,'Z'		;le resta al caracter 5A si es superior entonces puede ser que sea una letra minuscula
@@ -46,12 +48,15 @@ _compareTextsLower:
 	cmp al,'z'		;le resta al caracter 7A si es superior entonces da error
 	ja _finishCodeError	;da error
 	jmp _toUpperCase	;cambia a mayuscula el caracter
-	
+
+_addSpace:
+	mov byte[esi],al
+	inc esi
+	jmp _compareTexts
+		
 	
 _toUpperCase:			;cambia a mayuscula
 	mov al, byte[esi]
-	cmp al, 0xA
-	je _printFinalText
 	sub al, 32		;resta 32 bits al caracter volviendolo mayuscula
 	mov byte[esi],al
 	inc esi			;se obtiene el siguiente caracter
@@ -59,8 +64,6 @@ _toUpperCase:			;cambia a mayuscula
 
 _toLowerCase:			;cambia a minuscula
 	mov al, byte[esi]
-	cmp al, 0xA
-	je _printFinalText
 	add al, 32		;agrega 32 bits al caracter volviendolo minuscula
 	mov byte[esi],al
 	inc esi
