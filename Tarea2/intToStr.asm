@@ -1,24 +1,48 @@
+section .data
+	text1 db "Ingrese un numero", 0xA ;len 18
+	digitos db '0123456789ABCDEF'
+
 section .bss
-	number resb 20
+	number resb 21
+	num1 resb 101
 	
 section .text
 global _start
 
 _start:
-	mov rax, 432  ; 432/100=4, 32 => 3, 2
-	mov rsi, number
-	call __to_string
+	call _printText1	;Imprime el texto inicial
+	call _getText		;Obtiene el texto del teclado
+	call _ATOI
 	
+
+	;call __to_string
+
+	call _finishCode
+
+_printText1:			;texto inicial
 	mov rax, 1
 	mov rdi, 1
-	mov rsi, number
-	mov rdx, 3
-	syscall
-	
-	mov rax, 60
+	mov rsi, text1
+	mov rdx, 18
+	syscall 
+	ret
+
+_getText:			;obtiene el texto
+	mov rax, 0
 	mov rdi, 0
-	syscall
-	
+	mov rsi, num1
+	mov rdx, 101
+	syscall 
+	ret
+
+_ATOI:
+	mov rax, num1
+	xor rbx, rbx
+	xor rax, rax
+	lea rcx, [num1]
+	mov bl, byte[rcx]
+	ret
+
 __to_string:
 	push rax
 	
@@ -62,3 +86,8 @@ __to_string:
 		
 	pop rdx
 	ret
+
+_finishCode:			;finaliza codigo
+	mov rax, 60
+	mov rdi, 0
+	syscall
