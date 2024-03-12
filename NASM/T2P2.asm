@@ -6,7 +6,8 @@ section .bss
 
 section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
-		newl db " ", 0xA ;len 18
+		newl db " ", 0xA ;len 2
+		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
 	
 section .text
 
@@ -23,7 +24,7 @@ _start:
 	
 	call _printText1
 	call _getText
-	
+
 	;	
 	mov [num3], rax
 	call _process
@@ -46,6 +47,7 @@ _getText:			;obtiene el texto
 	mov rsi, num1
 	mov rdx, 101
 	syscall 
+	call _inputCheck
 	call _AtoiStart
 
 _AtoiStart:
@@ -70,6 +72,24 @@ _Atoi:
 
 _exitFunction: 
 	ret
+
+_inputCheck:
+	; Check input for non-numeric characters
+    	mov rsi, num1  ; address of the input buffer
+    	xor rcx, rcx   ; Clear counter
+    check_input:
+        	movzx rax, byte [rsi + rcx]  ; Load the current byte
+        	cmp rax, 0xA
+        	je input_valid      ; End of string reached
+        	cmp rax, '0'
+        	jb _finishError    ; Check for non-printable characters
+        	cmp rax, '9'
+        	ja _finishError    ; Check for non-printable characters
+        	inc rcx             ; Move to the next byte
+        	jmp check_input
+    input_valid:
+	ret
+
 
 _process:
 	mov rax, [num2]
@@ -165,6 +185,13 @@ __to_string:
 		
 	pop rdx ; limpia residuo de la pila
 	ret ; retorna de la funcion
+
+_finishError:			;finaliza codigo
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, errorCode
+	mov rdx, 32
+	syscall 
 
 _finishCode:			;finaliza codigo
 	mov rax, 60
