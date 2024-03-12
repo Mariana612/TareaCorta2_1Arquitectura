@@ -1,12 +1,106 @@
 section .bss
-	number resb 30 ; Reserva 30 bytes para el numero a convertir (cambiar si se quiere hacer mas grande)
+	number resb 101; Reserva 30 bytes para el numero a convertir (cambiar si se quiere hacer mas grande)
+	num1 resb 101
+	num2 resb 101
+	num3 resb 101
+
+section .data
+		text1 db "Ingrese un numero", 0xA ;len 18
+		newl db " ", 0xA ;len 18
 	
 section .text
+
 global _start
 
 _start:
+	call _printText1
+	call _getText
+
+	;sdf
+	mov [num2], rax
+	xor rax, rax
+	mov byte[num1], 0
+	
+	call _printText1
+	call _getText
+	
+	;	
+	mov [num3], rax
+	call _process
+	
+	call _finishCode
+	
+
+
+_printText1:			;texto inicial
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, text1
+	mov rdx, 18
+	syscall 
+	ret
+
+_getText:			;obtiene el texto
+	mov rax, 0
+	mov rdi, 0
+	mov rsi, num1
+	mov rdx, 101
+	syscall 
+	call _AtoiStart
+
+_AtoiStart:
+	xor rbx, rbx
+	xor rax, rax
+	lea rcx, [num1]
+	jmp _Atoi
+
+_Atoi:
+	mov bl, byte[rcx]
+	cmp bl, 0xA		
+	je _exitFunction
+
+	sub rbx,30h
+	imul rax, 10 
+	add rax, rbx
+
+
+	xor rbx,rbx
+	inc rcx
+	jmp _Atoi
+
+_exitFunction: 
+	ret
+
+_process:
+	mov rax, [num2]
+	sub rax, [num3]
+	call _startItoa
+	
+	call _clearBuffer
+
+	mov rax, [num2]
+	add rax, [num3]
+	call _startItoa
+
+	ret
+
+_clearBuffer:
+    ; Resetting the number buffer
+    mov rsi, number    ; Load the address of the number buffer into rsi
+    mov rcx, 101       ; Set the loop counter to the size of the buffer
+    xor al, al         ; Set al register to zero (null character)
+
+reset_loop:
+    mov [rsi], al      ; Store the value of al (zero) into the current byte of the buffer
+    inc rsi            ; Move to the next byte in the buffer
+    loop reset_loop    ; Continue the loop until rcx becomes zero
+
+ret
+
+
+_startItoa:
 	; inicializa el valor inicial en rax
-	mov rax, 4327890  
+	;mov rax, 1
 	; Carga la direccion de memoria de "number" en rsi
 	mov rsi, number
 	; Llama a la funcion para convertir a caracteres ASCII
@@ -16,13 +110,17 @@ _start:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, number
-	mov rdx, 30  ; cambiar esto si se quiere un num mas grande
+	mov rdx, 101  ; cambiar esto si se quiere un num mas grande
 	syscall
 	
-	;Salir del programa
-	mov rax, 60
-	mov rdi, 0
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, newl
+	mov rdx, 2 ; cambiar esto si se quiere un num mas grande
 	syscall
+	
+	ret
+	
 	
 __to_string:
 	push rax ; Guarda el valor de rax en la pila
@@ -67,3 +165,8 @@ __to_string:
 		
 	pop rdx ; limpia residuo de la pila
 	ret ; retorna de la funcion
+
+_finishCode:			;finaliza codigo
+	mov rax, 60
+	mov rdi, 0
+	syscall
