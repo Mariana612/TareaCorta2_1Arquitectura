@@ -7,6 +7,7 @@ section .bss
 section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
 		newl db " ", 0xA ;len 2
+		negSign db "-" ;len 2
 		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
 	
 section .text
@@ -124,7 +125,8 @@ _startItoa:
 	; Carga la direccion de memoria de "number" en rsi
 	mov rsi, number
 	; Llama a la funcion para convertir a caracteres ASCII
-	call __to_string
+	call _firstNeg
+	;call __to_string
 	
 	;Imprimir el resultado
 	mov rax, 1
@@ -140,13 +142,31 @@ _startItoa:
 	syscall
 	
 	ret
+
+_firstNeg:
+	push rax 
+	test rax, rax  ; Test if the number is negative
+    	jns _beforeToString   ; If negative, jump to negative section
 	
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, negSign
+	mov rdx, 1 ; cambiar esto si se quiere un num mas grande
+	syscall
+	
+	pop rax
+	neg rax
+	jmp __to_string
+
+_beforeToString:
+	pop rax
 	
 __to_string:
 	push rax ; Guarda el valor de rax en la pila
 	
 	mov rdi, 1
 	mov rcx, 1 ; contador de digitos a 1
+
 	mov rbx, 10 ; base para la division
 	get_divisor:
 		xor rdx, rdx ; limpia rdx para preparar la division
