@@ -8,7 +8,7 @@
     newl:       .string "\n"
     negSign:    .string "-"
     errorCode:  .string "Error: Ingrese un numero valido\n"
-
+    flag1: 	.byte 0
 .text
 .global _start
 
@@ -107,6 +107,11 @@ reset_loop:
 _startItoa:
     movq $number, %rsi      # carga la direccion de "number en rsi
     call _firstNeg
+
+    cmpb $1, flag1
+    je _printNeg
+
+_continueItoa:
     movq $1, %rax
     movq $1, %rdi
     movq $number, %rsi
@@ -119,25 +124,24 @@ _startItoa:
     movq $2, %rdx         # cambiar esto si se quiere un num mas grande
     syscall
 
+    movb $0, flag1
+
     ret
 
-_firstNeg:
-    pushq %rax 
-    testq %rax, %rax     # Prueba si el numero es negativo
-    jns _beforeToString  # si es negativo salta a la seccion negativo
-
+_printNeg:
     movq $1, %rax
     movq $1, %rdi
     movq $negSign, %rsi
     movq $1, %rdx        # cambiar esto si se quiere un num mas grande
     syscall
+    jmp _continueItoa
 
-    popq %rax
+_firstNeg:
+
+    testq %rax, %rax     # Prueba si el numero es negativo
+    jns __to_string  # si es negativo salta a la seccion negativo
     negq %rax
-    jmp __to_string
-
-_beforeToString:
-    popq %rax
+    movb $1, flag1
 
 __to_string:
     pushq %rax           # Guarda el valor de rax en la pila

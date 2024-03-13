@@ -17,22 +17,22 @@ section .text
 global _start
 
 _start:
-	call _printText1
-	call _getText
+	call _printText1	;Hace print inicial
+	call _getText		;Consigue el texto del usuario
 
-	;sdf
-	mov [num2], rax
-	xor rax, rax
-	mov byte[num1], 0
-	
-	call _printText1
-	call _getText
 
-	;	
-	mov [num3], rax
-	call _process
+	mov [num2], rax		;carga el primer numero en num2
+	xor rax, rax		;reinicia rax
+	mov byte[num1], 0	;reinicia num1
 	
-	call _finishCode
+	call _printText1	;Hace print inicial
+	call _getText		;Consigue el texto del usuario
+
+		
+	mov [num3], rax		;carga el primer numero en num3
+	call _process		;procesa las fomrulas necesarias
+	
+	call _finishCode	;finaliza el codigo
 	
 
 
@@ -50,59 +50,61 @@ _getText:			;obtiene el texto
 	mov rsi, num1
 	mov rdx, 101
 	syscall 
-	call _inputCheck
+	call _inputCheck	;se asegura de que se ingrese unicamente numeros
 	call _AtoiStart
 
 _AtoiStart:
-	xor rbx, rbx
-	xor rax, rax
-	lea rcx, [num1]
+	xor rbx, rbx		;reinicia el registro
+	xor rax, rax		;reinicia el registro
+	lea rcx, [num1]		;ingresa el numero 1 a rcx
 	jmp _Atoi
 
 _Atoi:
 	mov bl, byte[rcx]
 	cmp bl, 0xA		
-	je _exitFunction
+	je _exitFunction	;se asegura de que sea el final del string
 
-	sub rbx,30h
-	imul rax, 10 
-	add rax, rbx
+	sub rbx,30h		;resta 30h al string para volverlo el numero
+	imul rax, 10 		;multiplica el numero almacenado en rax x 10 para volverlo decimal
+	add rax, rbx		;agrega el ultimo numero obtenido a rax (ej: 10+3=13)	
 
 
-	xor rbx,rbx
-	inc rcx
-	jmp _Atoi
+	xor rbx,rbx		;reinicia el registro
+	inc rcx			;incrementa x 1 el rcx (obtiene el siguiente caracter
+	jmp _Atoi		;realiza loop
 
 _exitFunction: 
 	ret
 
 _inputCheck:
-	; Revisa el ingreso de caracteres no numericos
-    	mov rsi, num1  ; direccion del buffer de ingreso
-    	xor rcx, rcx   ; Clear counter
-    check_input:
-        	movzx rax, byte [rsi + rcx]  ; Carga el byte actual
+				; Revisa el ingreso de caracteres no numericos
+	mov rsi, num1		; direccion del buffer de ingreso
+    	xor rcx, rcx		; Clear counter
+
+	check_input:
+		movzx rax, byte [rsi + rcx]		;Carga el byte actual
         	cmp rax, 0xA
-        	je input_valid      ; Final del string alcanzado
+        	je input_valid				;Final del string alcanzado
         	cmp rax, '0'
-        	jb _finishError    ; Revisa caracteres no imprimibles
+        	jb _finishError				;Revisa caracteres no imprimibles
         	cmp rax, '9'
-        	ja _finishError    ; Revisa caracteres no imprimibles
-        	inc rcx             ; Mover al siguente byte
+        	ja _finishError				;Revisa caracteres no imprimibles
+        	inc rcx					;Mover al siguente byte
         	jmp check_input
-    input_valid:
-	ret
+
+	input_valid:
+		ret
 
 
 _process:
 	mov rax, [num2]
-	sub rax, [num3]
+	sub rax, [num3]		;realiza resta
 	call _startItoa
 	
-	call _clearBuffer
+	call _clearBuffer	;reinicia buffer para print
 
 	mov rax, [num2]
-	add rax, [num3]
+	add rax, [num3]		;realiza suma
 	call _startItoa
 
 	ret
@@ -122,34 +124,27 @@ ret
 
 
 _startItoa:
-	; inicializa el valor inicial en rax
-	;mov rax, 1
-	; Carga la direccion de memoria de "number" en rsi
-	mov rsi, number
-	; Llama a la funcion para convertir a caracteres ASCII
-	call _firstNeg
-	;call __to_string
+	mov rsi, number	;Carga la direccion de memoria de "number" en rsi
+	call _firstNeg	;Llama a la funcion para convertir a caracteres ASCII
 	
 
-	cmp byte[flag1], 1
-	je _printNeg
+	cmp byte[flag1], 1	;se asegura de que el primer numero sea o no negativo
+	je _printNeg		;realiza print del simbolo negativo
 
-_continueItoa:	
-	;Imprimir el resultado
-	mov rax, 1
+_continueItoa:		
+	mov rax, 1		;realiza print del numerno
 	mov rdi, 1
-	mov rsi, number
-	mov rdx, 101  ; cambiar esto si se quiere un num mas grande
+	mov rsi, number		;print resultado
+	mov rdx, 101  
 	syscall
 	
-	mov rax, 1
+	mov rax, 1		;realiza print del numerno
 	mov rdi, 1
-	mov rsi, newl
-	mov rdx, 2 ; cambiar esto si se quiere un num mas grande
+	mov rsi, newl		;print de enter
+	mov rdx, 2		
 	syscall
 
-	mov byte[flag1], 0
-	
+	mov byte[flag1], 0	;reinicia flag 
 	ret
 
 _printNeg:
@@ -161,56 +156,56 @@ _printNeg:
 	jmp _continueItoa
 
 _firstNeg:
-	test rax, rax  ; Test if the number is negative
-    	jns __to_string   ; If negative, jump to negative section
-	neg rax
+	test rax, rax		;realiza test a ver si el numero es negativo
+    	jns __to_string  	;si no es negativo salta a string directamente
+	neg rax			;vuelve positivo el numero
 	mov byte[flag1], 1
 
 	
 __to_string:
-	push rax ; Guarda el valor de rax en la pila
+	push rax		;Guarda el valor de rax en la pila
 	
 	mov rdi, 1
-	mov rcx, 1 ; contador de digitos a 1
+	mov rcx, 1		;contador de digitos a 1
 
-	mov rbx, 10 ; base para la division
+	mov rbx, 10		;base para la division
 	get_divisor:
-		xor rdx, rdx ; limpia rdx para preparar la division
-		div rbx  ; divide rax por 10, resultado en rax y residuo en rdx
+		xor rdx, rdx	;limpia rdx para preparar la division
+		div rbx 	;divide rax por 10, resultado en rax y residuo en rdx
 		
-		cmp rax, 0 ; comprueba si el cociente es cero
-		je _after ; termina bucle si es 0
-		imul rcx, 10  ; multiplica contador por 10
-		inc rdi ; incrementa el contador
-		jmp get_divisor ; vuelve al inicio del bucle
+		cmp rax, 0	;comprueba si el cociente es cero
+		je _after	;termina bucle si es 0
+		imul rcx, 10	;multiplica contador por 10
+		inc rdi		;incrementa el contador
+		jmp get_divisor ;vuelve al inicio del bucle
 		
 		
 	_after:
-		pop rax ; recupera el valor original de rax
-		push rdi ; guarda el contador de digitos en la pila
+		pop rax 	;recupera el valor original de rax
+		push rdi 	;guarda el contador de digitos en la pila
 		
 	to_string:
-		xor rdx, rdx ; limpia rdx para preparar la division
-		div rcx ; divide el valor original de rax por el contador de digitos
+		xor rdx, rdx 	;limpia rdx para preparar la division
+		div rcx 	;divide el valor original de rax por el contador de digitos
 		
-		add al, "0" ; Convierte digito a su representacion en ASCII
-		mov [rsi], al ; almacena digito a la posicion de memoria
-		inc rsi ; incrementa el puntero a la siguiente posicion de memoria
+		add al, "0" 	;Convierte digito a su representacion en ASCII
+		mov [rsi], al 	;almacena digito a la posicion de memoria
+		inc rsi 	;incrementa el puntero a la siguiente posicion de memoria
 		
-		push rdx ; guarda el residuo de la division en la pila
-		xor rdx, rdx ; limpia rdx
-		mov rax, rcx ; restaura rax
-		mov rbx, 10 ; establece la base para la division siguiente
-		div rbx ; divide el valor original de rax por 10
-		mov rcx, rax ; actualiza el contador con el nuevo valor de rax
+		push rdx 	;guarda el residuo de la division en la pila
+		xor rdx, rdx 	;limpia rdx
+		mov rax, rcx 	;restaura rax
+		mov rbx, 10 	;establece la base para la division siguiente
+		div rbx 	;divide el valor original de rax por 10
+		mov rcx, rax 	;actualiza el contador con el nuevo valor de rax
 		
-		pop rax ; recupera el residuo de la pila
+		pop rax 	;recupera el residuo de la pila
 		
-		cmp rcx, 0 ; Comprueba que se han procesado todos los digitos
-		jg to_string ; continua el bucle si aun no se procesan todos los digitos
+		cmp rcx, 0 	;Comprueba que se han procesado todos los digitos
+		jg to_string 	;continua el bucle si aun no se procesan todos los digitos
 		
-	pop rdx ; limpia residuo de la pila
-	ret ; retorna de la funcion
+	pop rdx 		;limpia residuo de la pila
+	ret 			;retorna de la funcion
 
 _finishError:			;finaliza codigo
 	mov rax, 1
