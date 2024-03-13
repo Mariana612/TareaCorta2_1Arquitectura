@@ -105,6 +105,7 @@ _startItoa:
     call __to_string
     
     # Print the result
+    
     movq $1, %rax          # syscall number for sys_write
     movq $1, %rdi          # file descriptor 1 (stdout)
     movq number(%rip), %rsi   # pointer to the number buffer
