@@ -3,12 +3,14 @@ section .bss
 	num1 resb 101
 	num2 resb 101
 	num3 resb 101
+	
 
 section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
 		newl db " ", 0xA ;len 2
 		negSign db "-" ;len 2
 		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
+		flag1 db 0
 	
 section .text
 
@@ -128,6 +130,11 @@ _startItoa:
 	call _firstNeg
 	;call __to_string
 	
+
+	cmp byte[flag1], 1
+	je _printNeg
+
+_continueItoa:	
 	;Imprimir el resultado
 	mov rax, 1
 	mov rdi, 1
@@ -140,26 +147,25 @@ _startItoa:
 	mov rsi, newl
 	mov rdx, 2 ; cambiar esto si se quiere un num mas grande
 	syscall
+
+	mov byte[flag1], 0
 	
 	ret
 
-_firstNeg:
-	push rax 
-	test rax, rax  ; Test if the number is negative
-    	jns _beforeToString   ; If negative, jump to negative section
-	
+_printNeg:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, negSign
-	mov rdx, 1 ; cambiar esto si se quiere un num mas grande
+	mov rdx, 1 ; 
 	syscall
-	
-	pop rax
-	neg rax
-	jmp __to_string
+	jmp _continueItoa
 
-_beforeToString:
-	pop rax
+_firstNeg:
+	test rax, rax  ; Test if the number is negative
+    	jns __to_string   ; If negative, jump to negative section
+	neg rax
+	mov byte[flag1], 1
+
 	
 __to_string:
 	push rax ; Guarda el valor de rax en la pila
