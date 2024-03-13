@@ -3,12 +3,14 @@ section .bss
 	num1 resb 101
 	num2 resb 101
 	num3 resb 101
+	
 
 section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
 		newl db " ", 0xA ;len 2
 		negSign db "-" ;len 2
 		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
+		flag1 db 0
 	
 section .text
 
@@ -75,18 +77,18 @@ _exitFunction:
 	ret
 
 _inputCheck:
-	; Check input for non-numeric characters
-    	mov rsi, num1  ; address of the input buffer
+	; Revisa el ingreso de caracteres no numericos
+    	mov rsi, num1  ; direccion del buffer de ingreso
     	xor rcx, rcx   ; Clear counter
     check_input:
-        	movzx rax, byte [rsi + rcx]  ; Load the current byte
+        	movzx rax, byte [rsi + rcx]  ; Carga el byte actual
         	cmp rax, 0xA
-        	je input_valid      ; End of string reached
+        	je input_valid      ; Final del string alcanzado
         	cmp rax, '0'
-        	jb _finishError    ; Check for non-printable characters
+        	jb _finishError    ; Revisa caracteres no imprimibles
         	cmp rax, '9'
-        	ja _finishError    ; Check for non-printable characters
-        	inc rcx             ; Move to the next byte
+        	ja _finishError    ; Revisa caracteres no imprimibles
+        	inc rcx             ; Mover al siguente byte
         	jmp check_input
     input_valid:
 	ret
@@ -106,15 +108,15 @@ _process:
 	ret
 
 _clearBuffer:
-    ; Resetting the number buffer
-    mov rsi, number    ; Load the address of the number buffer into rsi
-    mov rcx, 101       ; Set the loop counter to the size of the buffer
-    xor al, al         ; Set al register to zero (null character)
+    ; Resetea el buffer de numeros
+    mov rsi, number    ; Carga la direccion del buffer de numeros al rsi
+    mov rcx, 101       ; Coloca el ciclo contador del mismo tamano del buffer
+    xor al, al         ; Coloca cada registro en cero (null character)
 
 reset_loop:
-    mov [rsi], al      ; Store the value of al (zero) into the current byte of the buffer
-    inc rsi            ; Move to the next byte in the buffer
-    loop reset_loop    ; Continue the loop until rcx becomes zero
+    mov [rsi], al      ; Guarda el valor de  al (zero) en el byte actual del buffer
+    inc rsi            ; Mueve al siguiente byte del buffer
+    loop reset_loop    ; Continua el ciclo hasta que rcx se convierte en cero
 
 ret
 
@@ -128,6 +130,11 @@ _startItoa:
 	call _firstNeg
 	;call __to_string
 	
+
+	cmp byte[flag1], 1
+	je _printNeg
+
+_continueItoa:	
 	;Imprimir el resultado
 	mov rax, 1
 	mov rdi, 1
@@ -140,26 +147,25 @@ _startItoa:
 	mov rsi, newl
 	mov rdx, 2 ; cambiar esto si se quiere un num mas grande
 	syscall
+
+	mov byte[flag1], 0
 	
 	ret
 
-_firstNeg:
-	push rax 
-	test rax, rax  ; Test if the number is negative
-    	jns _beforeToString   ; If negative, jump to negative section
-	
+_printNeg:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, negSign
-	mov rdx, 1 ; cambiar esto si se quiere un num mas grande
+	mov rdx, 1 ; 
 	syscall
-	
-	pop rax
-	neg rax
-	jmp __to_string
+	jmp _continueItoa
 
-_beforeToString:
-	pop rax
+_firstNeg:
+	test rax, rax  ; Test if the number is negative
+    	jns __to_string   ; If negative, jump to negative section
+	neg rax
+	mov byte[flag1], 1
+
 	
 __to_string:
 	push rax ; Guarda el valor de rax en la pila
