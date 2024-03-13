@@ -74,18 +74,18 @@ _exitFunction:
 	ret
 
 _inputCheck:
-	; Check input for non-numeric characters
-    	mov rsi, num1  ; address of the input buffer
+	; Revisa el ingreso de caracteres no numericos
+    	mov rsi, num1  ; direccion del buffer de ingreso
     	xor rcx, rcx   ; Clear counter
     check_input:
-        	movzx rax, byte [rsi + rcx]  ; Load the current byte
+        	movzx rax, byte [rsi + rcx]  ; Carga el byte actual
         	cmp rax, 0xA
-        	je input_valid      ; End of string reached
+        	je input_valid      ; Final del string alcanzado
         	cmp rax, '0'
-        	jb _finishError    ; Check for non-printable characters
+        	jb _finishError    ; Revisa caracteres no imprimibles
         	cmp rax, '9'
-        	ja _finishError    ; Check for non-printable characters
-        	inc rcx             ; Move to the next byte
+        	ja _finishError    ; Revisa caracteres no imprimibles
+        	inc rcx             ; Mover al siguente byte
         	jmp check_input
     input_valid:
 	ret
@@ -105,15 +105,15 @@ _process:
 	ret
 
 _clearBuffer:
-    ; Resetting the number buffer
-    mov rsi, number    ; Load the address of the number buffer into rsi
-    mov rcx, 101       ; Set the loop counter to the size of the buffer
-    xor al, al         ; Set al register to zero (null character)
+    ; Resetea el buffer de numeros
+    mov rsi, number    ; Carga la direccion del buffer de numeros al rsi
+    mov rcx, 101       ; Coloca el ciclo contador del mismo tamano del buffer
+    xor al, al         ; Coloca cada registro en cero (null character)
 
 reset_loop:
-    mov [rsi], al      ; Store the value of al (zero) into the current byte of the buffer
-    inc rsi            ; Move to the next byte in the buffer
-    loop reset_loop    ; Continue the loop until rcx becomes zero
+    mov [rsi], al      ; Guarda el valor de  al (zero) en el byte actual del buffer
+    inc rsi            ; Mueve al siguiente byte del buffer
+    loop reset_loop    ; Continua el ciclo hasta que rcx se convierte en cero
 
 ret
 
