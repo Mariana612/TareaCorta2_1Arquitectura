@@ -13,19 +13,19 @@
 .global _start
 
 _start:
-    call _printText1
-    call _getText
+    call _printText1	#Hace print inicial
+    call _getText	#Consigue el texto del usuario
     
-    movq %rax, num2
-    xorq %rax, %rax
-    movb $0, (num1)
+    movq %rax, num2	#carga el primer numero en num2
+    xorq %rax, %rax	#reinicia rax
+    movb $0, (num1)	#reinicia num1
 
-    call _printText1
-    call _getText
+    call _printText1	#Hace print inicial
+    call _getText	#Consigue el texto del usuario
     
-    movq %rax, num3
-    call _process
-    call _finishCode
+    movq %rax, num3	#carga el primer numero en num3
+    call _process	#procesa las fomrulas necesarias
+    call _finishCode	#finaliza el codigo
 
 _printText1:            # texto inicial
     movq $1, %rax
@@ -41,27 +41,27 @@ _getText:               # obtiene el texto
     movq $num1, %rsi
     movq $101, %rdx
     syscall 
-    call _inputCheck
+    call _inputCheck	#se asegura de que se ingrese unicamente numeros
     call _AtoiStart
 
 _AtoiStart:
-    xorq %rbx, %rbx
-    xorq %rax, %rax
-    leaq num1(%rip), %rcx
+    xorq %rbx, %rbx	#reinicia el registro
+    xorq %rax, %rax	#reinicia el registro
+    leaq num1(%rip), %rcx	#ingresa el numero 1 a rcx
     jmp _Atoi
 
 _Atoi:
     movb (%rcx), %bl
     cmpb $0xA, %bl
-    je _exitFunction
+    je _exitFunction	#se asegura de que sea el final del string
 
-    subb $0x30, %bl
-    imulq $10, %rax
-    addq %rbx, %rax
+    subb $0x30, %bl	#resta 30h al string para volverlo el numero		
+    imulq $10, %rax	#multiplica el numero almacenado en rax x 10 para volverlo decimal
+    addq %rbx, %rax	#agrega el ultimo numero obtenido a rax (ej: 10+3=13)
 
-    xorq %rbx, %rbx
-    incq %rcx
-    jmp _Atoi
+    xorq %rbx, %rbx	#reinicia el registro
+    incq %rcx		#incrementa x 1 el rcx (obtiene el siguiente caracter
+    jmp _Atoi		#realiza loop
 
 _exitFunction:
     ret

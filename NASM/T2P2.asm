@@ -77,7 +77,7 @@ _exitFunction:
 	ret
 
 _inputCheck:
-				; Revisa el ingreso de caracteres no numericos
+				
 	mov rsi, num1		; direccion del buffer de ingreso
     	xor rcx, rcx		; Clear counter
 
