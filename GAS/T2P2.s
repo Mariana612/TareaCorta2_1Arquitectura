@@ -1,12 +1,12 @@
 .section .bss
-    .lcomm number, 101   # Reserve 101 bytes for the number
+    .lcomm number, 101   # Reserva 101 bytes para el numero
     .lcomm num1, 101
     .lcomm num2, 101
     .lcomm num3, 101
 
 .section .data
-    text1:  .ascii "Ingrese un numero\n\0"  # String with newline
-    newl:   .ascii " \n\0"                  # Newline and null terminator
+    text1:  .ascii "Ingrese un numero\n\0"  # String con nueva linea
+    newl:   .ascii " \n\0"                  # Nueva linea y null terminator
 
 .section .text
 .globl _start
@@ -15,9 +15,9 @@ _start:
     #call _printText1
     #call _getText
 
-    #mov %rax, num2(%rip)    # Store the input into num2
-    #xor %rax, %rax           # Clear rax (num1)
-    #movb $0, num1(%rip)      # Set the first byte of num1 to 0
+    #mov %rax, num2(%rip)    # Guarda el dato ingresado en num2
+    #xor %rax, %rax           # Limpia el rax (num1)
+    #movb $0, num1(%rip)      # Coloca el primer byte de num1 a 0
 
     #call _printText1
     #call _getText
@@ -30,18 +30,18 @@ _start:
     call _finishCode
 
 _printText1:
-    mov $1, %rax            # syscall number for sys_write
-    mov $1, %rdi            # file descriptor 1 (stdout)
-    lea text1(%rip), %rsi   # pointer to the string
-    mov $18, %rdx           # number of bytes to write
+    mov $1, %rax            # syscall numero a sys_write
+    mov $1, %rdi            # Descriptor de archivo 1 (stdout)
+    lea text1(%rip), %rsi   # puntero a string
+    mov $18, %rdx           # numero de bytes a escribir
     syscall
     ret
 
 _getText:
-    mov $0, %rax            # syscall number for sys_read
-    mov $0, %rdi            # file descriptor 0 (stdin)
-    lea num1(%rip), %rsi    # pointer to the buffer
-    mov $101, %rdx          # number of bytes to read
+    mov $0, %rax            # syscall numero a sys_read
+    mov $0, %rdi            # Descriptor de archivo 0 (stdin)
+    lea num1(%rip), %rsi    # puntero a buffer
+    mov $101, %rdx          # numero de bytes a leer
     syscall
     call _AtoiStart
     ret
@@ -53,69 +53,69 @@ _AtoiStart:
     jmp _Atoi
 
 _Atoi:
-    movb (%rcx), %bl         # Move byte at [rcx] into bl
-    cmpb $0xA, %bl           # Check for newline character
+    movb (%rcx), %bl         # Mover byte de [rcx] a bl
+    cmpb $0xA, %bl           # Revisar caracter de nueva linea
     je _exitFunction
 
-    sub $0x30, %rbx          # Convert ASCII to integer
-    imul $10, %rax           # Multiply previous result by 10
-    add %rbx, %rax           # Add new digit
+    sub $0x30, %rbx          # Convertir ASCII a integer
+    imul $10, %rax           # Multiplicar resultados por 10
+    add %rbx, %rax           # Agregar nuevo digito
 
-    xor %rbx, %rbx           # Clear rbx
-    inc %rcx                 # Move to next character
+    xor %rbx, %rbx           # LImpiar rbx
+    inc %rcx                 # Mover a siguiente caracter
     jmp _Atoi
 
 _exitFunction:
     ret
 
 _process:
-    movq num2(%rip), %rax    # Load num2 into rax
-    subq num3(%rip), %rax       # Subtract num3 from rax
+    movq num2(%rip), %rax    # Cargar num2 a rax
+    subq num3(%rip), %rax       # Quitar num3 de rax
     call _startItoa
 
 
     #call _clearBuffer
 
-    #movq number(%rip), %rax    # Reload num2 into rax
-    #addq num3(%rip), %rax       # Add num3 to rax
+    #movq number(%rip), %rax    # Recargar num2 a rax
+    #addq num3(%rip), %rax       # Agregar num3 a rax
     #call _startItoa
 
     ret
     
 
 _clearBuffer:
-    # Resetting the number buffer
-    movq $number, %rsi    # Load the address of the number buffer into rsi
-    movq $101, %rcx       # Set the loop counter to the size of the buffer
-    xorq %rax, %rax       # Set al register to zero (null character)
+    # Resetear el numero de buffer
+    movq $number, %rsi    # Cargar la direccion del buffer de numero a rsi
+    movq $101, %rcx       # Colocar el ciclo de contador al mismo tamano del buffer
+    xorq %rax, %rax       # Colocar todos los registros en cero (null character)
 
 reset_loop:
-    movb %al, (%rsi)      # Store the value of al (zero) into the current byte of the buffer
-    incq %rsi             # Move to the next byte in the buffer
-    loop reset_loop       # Continue the loop until rcx becomes zero
+    movb %al, (%rsi)      # Guardar el valor de  al (zero) al buffer actual del byte
+    incq %rsi             # Mover al sigueinte byte del buffer
+    loop reset_loop       # Continuar el ciclo hasta que rcx se convierta a 0
 
     ret
 
 
 _startItoa:
-    # Load the address of the number buffer into rsi
+    # Cargar la direccion del buffer de numero a rsi
     movq number(%rip), %rsi
     
     # Call the __to_string function
     call __to_string
     
     # Print the result
-    movq $1, %rax          # syscall number for sys_write
-    movq $1, %rdi          # file descriptor 1 (stdout)
-    movq number(%rip), %rsi   # pointer to the number buffer
-    movq $101, %rdx        # number of bytes to write
+    movq $1, %rax          # syscall numero a sys_write
+    movq $1, %rdi          # descriptor de archivo 1 (stdout)
+    movq number(%rip), %rsi   # puntero al buffer de numero
+    movq $101, %rdx        # numero de bytes a escribir
     syscall
     
     # Print newline character
-    movq $1, %rax          # syscall number for sys_write
-    movq $1, %rdi          # file descriptor 1 (stdout)
-    movq newl(%rip), %rsi  # pointer to the newline character
-    movq $2, %rdx          # number of bytes to write
+    movq $1, %rax          # syscall numero a sys_write
+    movq $1, %rdi          # descriptor de archivo 1 (stdout)
+    movq newl(%rip), %rsi  # puntero al caracter de nueva linea
+    movq $2, %rdx          # numero de bytes a escribir
     syscall
     
     ret
@@ -123,7 +123,7 @@ _startItoa:
 __to_string:
     pushq %rax             # Guarda el valor de rax en la pila
     
-    movq $1, %rdi          # file descriptor 1 (stdout)
+    movq $1, %rdi          # descriptor de archivo 1 (stdout)
     movq $1, %rcx          # contador de digitos a 1
     movq $10, %rbx         # base para la division
 get_divisor:
@@ -164,7 +164,7 @@ to_string:
     popq %rdx              # limpia residuo de la pila
     ret                     # retorna de la funcion
 
-_finishCode:           # Finalizes code
-    movq $60, %rax     # syscall number for sys_exit
-    xorq %rdi, %rdi    # Exit code 0
+_finishCode:           # Finalizar codigo
+    movq $60, %rax     # syscall numero a sys_exit
+    xorq %rdi, %rdi    # Salir del codigo 0
     syscall
