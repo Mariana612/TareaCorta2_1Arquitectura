@@ -12,6 +12,7 @@ section .data
 		negSign db "-" ;len 2
 		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
 		overflowMsg db "ERROR: Overflow de la suma", 0xA
+		overflowMsg2 db "ERROR: Overflow de la resta", 0xA
 		flag1 db 0
 	
 section .text
@@ -99,35 +100,38 @@ _inputCheck:
 
 
 _process:
-    mov rax, 1
-    add rax, 0FFFFFFFFFFFFFFFFh    ; Hace la suma
-    
-    jo _overflowDetected ; detecta overflow (no sirve hasta el momento)
 
-    
+    mov rax, [num2]
+    add rax, [num3]   ; Hace la suma
+    jo _overflowDetected
     call _startItoa
     
+_continueProcess:
     call _clearBuffer
+
     mov rax, [num2]
     sub rax, [num3]     ; Hace la resta
+    jo _overflowDetected2
     call _startItoa     ; Convierte a ASCII e imprime
     ret
 
 _overflowDetected:
-	call _overflowMessage
-	call _clearBuffer
-	mov rax, [num2]
-	sub rax, [num3]
-	call _startItoa
-	ret
-	
-_overflowMessage:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, overflowMsg
 	mov rdx, 27
 	syscall
-	ret
+	jmp _continueProcess
+
+_overflowDetected2:
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, overflowMsg2
+	mov rdx, 28
+	syscall
+	jmp _finishCode
+	
+	
 
 _clearBuffer:
     ; Resetea el buffer de numeros
