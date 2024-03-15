@@ -4,12 +4,14 @@ section .bss
 	num2 resb 101
 	num3 resb 101
 	
+	
 
 section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
 		newl db " ", 0xA ;len 2
 		negSign db "-" ;len 2
 		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
+		overflowMsg db "ERROR: Overflow de la suma", 0xA
 		flag1 db 0
 	
 section .text
@@ -30,7 +32,7 @@ _start:
 
 		
 	mov [num3], rax		;carga el primer numero en num3
-	call _process		;procesa las fomrulas necesarias
+	call _process		;procesa las formulas necesarias
 	
 	call _finishCode	;finaliza el codigo
 	
@@ -97,16 +99,34 @@ _inputCheck:
 
 
 _process:
+    mov rax, 1
+    add rax, 0FFFFFFFFFFFFFFFFh    ; Hace la suma
+    
+    jo _overflowDetected ; detecta overflow (no sirve hasta el momento)
+
+    
+    call _startItoa
+    
+    call _clearBuffer
+    mov rax, [num2]
+    sub rax, [num3]     ; Hace la resta
+    call _startItoa     ; Convierte a ASCII e imprime
+    ret
+
+_overflowDetected:
+	call _overflowMessage
+	call _clearBuffer
 	mov rax, [num2]
-	sub rax, [num3]		;realiza resta
+	sub rax, [num3]
 	call _startItoa
+	ret
 	
-	call _clearBuffer	;reinicia buffer para print
-
-	mov rax, [num2]
-	add rax, [num3]		;realiza suma
-	call _startItoa
-
+_overflowMessage:
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, overflowMsg
+	mov rdx, 27
+	syscall
 	ret
 
 _clearBuffer:
