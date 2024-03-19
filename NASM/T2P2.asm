@@ -10,11 +10,12 @@ section .data
 		text1 db "Ingrese un numero", 0xA ;len 18
 		newl db " ", 0xA ;len 2
 		negSign db "-" ;len 2
-		errorCode db "Error: Ingrese un numero valido", 0xA; len 31
+		errorCode db "Error: El caracter debe ser un numero", 0xA; len 37
 		overflowMsg db "ERROR: Overflow de la suma", 0xA
 		overflowMsg2 db "ERROR: Overflow de la resta", 0xA
 		flag1 db 0
-	
+		msgRes db "El resultado es: ", 0xA
+
 section .text
 
 global _start
@@ -150,18 +151,24 @@ ret
 _startItoa:
 	mov rsi, number	;Carga la direccion de memoria de "number" en rsi
 	call _firstNeg	;Llama a la funcion para convertir a caracteres ASCII
-	
 
+	mov rax, 1		;realiza el print del mensaje
+	mov rdi, 1
+	mov rsi, msgRes		;print mensaje resultado
+	mov rdx, 17
+	syscall
+	
 	cmp byte[flag1], 1	;se asegura de que el primer numero sea o no negativo
 	je _printNeg		;realiza print del simbolo negativo
 
 _continueItoa:		
+
 	mov rax, 1		;realiza print del numerno
 	mov rdi, 1
 	mov rsi, number		;print resultado
 	mov rdx, 101  
 	syscall
-	
+
 	mov rax, 1		;realiza print del numerno
 	mov rdi, 1
 	mov rsi, newl		;print de enter
@@ -235,7 +242,7 @@ _finishError:			;finaliza codigo
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, errorCode
-	mov rdx, 32
+	mov rdx, 38
 	syscall 
 
 _finishCode:			;finaliza codigo

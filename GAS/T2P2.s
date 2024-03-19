@@ -9,6 +9,7 @@
     negSign:    .string "-"
     errorCode:  .string "Error: Ingrese un numero valido\n"
     flag1: 	.byte 0
+    msgRes:     .string "El resultado es: \n"
 .text
 .global _start
 
@@ -107,6 +108,14 @@ reset_loop:
 _startItoa:
     movq $number, %rsi      # carga la direccion de "number en rsi
     call _firstNeg
+	
+
+    movq $1, %rax
+    movq $1, %rdi
+    movq $msgRes, %rsi
+    movq $19, %rdx        # cambiar esto si se quiere un num mas grande
+    syscall
+
 
     cmpb $1, flag1
     je _printNeg
