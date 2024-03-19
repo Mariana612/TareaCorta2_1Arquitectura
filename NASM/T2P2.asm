@@ -127,6 +127,7 @@ _numTooBig:
     mov rdx, 37
     syscall
     jmp _finishCode                   ; Exit
+    
 _process:
 
     mov rax, [num2]
