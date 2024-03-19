@@ -13,6 +13,7 @@ section .data
 		errorCode db "Error: El caracter debe ser un numero", 0xA; len 37
 		overflowMsg db "ERROR: Overflow de la suma", 0xA
 		overflowMsg2 db "ERROR: Overflow de la resta", 0xA
+		sizeErrorMsg db "ERROR: El numero es demasiado grande", 0xA
 		flag1 db 0
 		msgRes db "El resultado es: ", 0xA
 
@@ -49,11 +50,13 @@ _printText1:			;texto inicial
 	ret
 
 _getText:			;obtiene el texto
+	
 	mov rax, 0
 	mov rdi, 0
 	mov rsi, num1
 	mov rdx, 101
 	syscall 
+	call _checkNumSize      ; checkea que el numero no sea demasiado grande
 	call _inputCheck	;se asegura de que se ingrese unicamente numeros
 	call _AtoiStart
 
@@ -99,7 +102,31 @@ _inputCheck:
 	input_valid:
 		ret
 
+_checkNumSize:
+    mov rax, 0          ; Limpia a rax
+    mov rsi, num1       
+    xor rcx, rcx        ; limpia rcx
 
+    ; Loop to count the number of digits
+    count_digits:
+        movzx rbx, byte [rsi + rcx]   ; carga el byte a [rsi + rcx]
+        cmp rbx, 0xA                   ; checkea end of loop
+        je end_count                   ; si es sale loop
+        inc rcx                        ; incrementa el contador
+        jmp count_digits               ; continua el loop
+
+    end_count:
+        cmp rcx, 20                    ; checkea que el numero no se amas grande que 19
+        jg _numTooBig                  ; si lo es jump a _numTooBig
+        ret
+
+_numTooBig:
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, sizeErrorMsg
+    mov rdx, 37
+    syscall
+    jmp _finishCode                   ; Exit
 _process:
 
     mov rax, [num2]
