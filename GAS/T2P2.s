@@ -43,7 +43,9 @@ _getText:               # obtiene el texto
     movq $101, %rdx
     syscall 
     call _inputCheck	#se asegura de que se ingrese unicamente numeros
+    
     call _AtoiStart
+
 
 _AtoiStart:
     xorq %rbx, %rbx	#reinicia el registro
@@ -70,6 +72,8 @@ _exitFunction:
 _inputCheck:
     movq $num1, %rsi   # Direccion del buffer input
     xorq %rcx, %rcx    # Limpia contador
+    movb $0, flag1     # Reinicia la bandera que indica si el número es negativo
+    movq $101, %rdx    # Establece el límite de 19 dígitos
 check_input:
     movzbq (%rsi, %rcx), %rax  # Carga el byte actual
     cmpb $0xA, %al
@@ -79,6 +83,8 @@ check_input:
     cmpb $'9', %al
     ja _finishError    # Checkea que no tenga caracteres invalidos
     incq %rcx             # Se mueve al siguiente byte
+    cmpq $19, %rcx        # Comprueba si se supera el límite de 19 dígitos
+    jg _finishError       # Si se supera, muestra un mensaje de error y termina
     jmp check_input
 input_valid:
     ret
