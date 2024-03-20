@@ -10,6 +10,8 @@
     errorCode:  .string "Error: Ingrese un numero valido\n"
     flag1: 	.byte 0
     msgRes:     .string "El resultado es: \n"
+    overflowMsg: .string "Overflow en la suma"
+    overflowMsg2: .string "Overflow en la resta"
 .text
 .global _start
 
@@ -83,7 +85,7 @@ check_input:
     cmpb $'9', %al
     ja _finishError    # Checkea que no tenga caracteres invalidos
     incq %rcx             # Se mueve al siguiente byte
-    cmpq $19, %rcx        # Comprueba si se supera el límite de 19 dígitos
+    cmpq $20, %rcx        # Comprueba si se supera el límite de 19 dígitos
     jg _finishError       # Si se supera, muestra un mensaje de error y termina
     jmp check_input
 input_valid:
@@ -91,15 +93,33 @@ input_valid:
 
 _process:
     movq num2(%rip), %rax
-    subq num3(%rip), %rax
+    addq num3(%rip), %rax
+    jo _overflowDetected
     call _startItoa
 
+_continueProcess:
     call _clearBuffer
-
     movq num2(%rip), %rax
-    addq num3(%rip), %rax
+    subq num3(%rip), %rax
+    jo _overflowDetected2
     call _startItoa
     ret
+
+_overflowDetected:
+    movq $1, %rax
+    movq $1, %rdi
+    movq $overflowMsg, %rsi
+    movq $27, %rdx
+    syscall
+    jmp _continueProcess
+
+_overflowDetected2:
+    movq $1, %rax
+    movq $1, %rdi
+    movq $overflowMsg2, %rsi
+    movq $28, %rdx
+    syscall
+    jmp _finishCode
 
 _clearBuffer:
     movq $number, %rsi    # Resetiando el numero de buffer

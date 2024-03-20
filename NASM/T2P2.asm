@@ -116,7 +116,7 @@ _checkNumSize:
         jmp count_digits               ; continua el loop
 
     end_count:
-        cmp rcx, 20                    ; checkea que el numero no se amas grande que 19
+        cmp rcx, 21                    ; checkea que el numero no se amas grande que 19
         jg _numTooBig                  ; si lo es jump a _numTooBig
         ret
 
